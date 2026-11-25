@@ -1,0 +1,83 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --bg-canvas: #F3F0E8;
+    --bg-surface: #FFFFFF;
+    --bg-subtle: #EAE6DC;
+    --bg-sage-tint: #C8D3BD;
+    --accent-primary: #526B58;
+    --accent-hover: #435948;
+    --text-primary: #373B35;
+    --text-muted: #656B61;
+    --border-subtle: #D8D4C9;
+  }
+
+  .dark {
+    --bg-canvas: #141815;
+    --bg-surface: #1C221E;
+    --bg-subtle: #232B25;
+    --bg-sage-tint: #263229;
+    --accent-primary: #6F9278;
+    --accent-hover: #7EA488;
+    --text-primary: #ECEEE9;
+    --text-muted: #A2ACA0;
+    --border-subtle: #2D3730;
+  }
+
+  html {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.katex {
+  font-size: 1.02em;
+  color: inherit;
+}
+
+.katex-display {
+  margin: 0.35em 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+}
+
+@media print {
+  aside,
+  header,
+  .no-print {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  body,
+  html {
+    background: #FFFFFF !important;
+    color: #111111 !important;
+  }
+  .print-area {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
