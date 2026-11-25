@@ -87,7 +87,7 @@ if __name__ == "__main__":
             import flask  # noqa: F401
             flask_app = create_flask_app()
             print(f"GroupTheory Lab Python Math Engine listening on http://{host}:{port} (Flask)", flush=True)
-            flask_app.run(host=host, port=port, debug=False)
+            flask_app.run(host=host, port=port, debug=False, use_reloader=False, threaded=True)
             sys.exit(0)
         except ImportError:
             pass

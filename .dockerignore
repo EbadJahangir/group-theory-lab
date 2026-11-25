@@ -1,0 +1,28 @@
+# Dependencies & build artifacts
+node_modules
+dist
+build
+coverage
+
+# Git & editor metadata
+.git
+.gitignore
+.DS_Store
+*.log
+
+# Local secrets & environment files
+.env
+.env.*
+!.env.example
+
+# Python caches & virtual environments
+__pycache__
+*.py[cod]
+*$py.class
+.pytest_cache
+.venv
+venv
+env
+
+# Workspace internal metadata
+.aistudio

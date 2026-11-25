@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { spawn, type ChildProcess } from 'child_process';
 import express from 'express';
 import path from 'path';
@@ -6,18 +7,23 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PYTHON_PORT = Number(process.env.PYTHON_BACKEND_PORT || 5050);
-const PYTHON_URL = `http://127.0.0.1:${PYTHON_PORT}`;
 const PORT = Number(process.env.PORT || 3000);
+const configuredPythonPort = Number(process.env.PYTHON_BACKEND_PORT || 5050);
+const PYTHON_PORT = configuredPythonPort === PORT ? PORT + 1 : configuredPythonPort;
+const PYTHON_URL = `http://127.0.0.1:${PYTHON_PORT}`;
+const PYTHON_EXECUTABLE = process.env.PYTHON_EXECUTABLE || 'python3';
 
 let pythonProc: ChildProcess | null = null;
+let pythonStartupFailure: string | null = null;
 
 function startPythonBackend(): void {
   const scriptPath = path.join(__dirname, 'backend', 'app.py');
-  pythonProc = spawn('python3', [scriptPath], {
+  pythonStartupFailure = null;
+  pythonProc = spawn(PYTHON_EXECUTABLE, [scriptPath], {
     cwd: __dirname,
     env: {
       ...process.env,
+      PYTHONUNBUFFERED: '1',
       PYTHON_BACKEND_PORT: String(PYTHON_PORT),
       PYTHON_BACKEND_HOST: '127.0.0.1',
     },
@@ -31,15 +37,28 @@ function startPythonBackend(): void {
     process.stderr.write(`[python] ${chunk}`);
   });
 
+  pythonProc.on('error', (err) => {
+    pythonStartupFailure = `Failed to spawn Python backend (${PYTHON_EXECUTABLE}): ${err.message}`;
+    console.error(`[python] ${pythonStartupFailure}`);
+    pythonProc = null;
+  });
+
   pythonProc.on('exit', (code, signal) => {
-    console.error(`[python] backend exited (code=${code}, signal=${signal})`);
+    const msg = `backend exited (code=${code}, signal=${signal})`;
+    console.error(`[python] ${msg}`);
+    if (code !== 0) {
+      pythonStartupFailure = `Python mathematical engine ${msg}`;
+    }
     pythonProc = null;
   });
 }
 
-async function waitForPythonHealth(timeoutMs = 8000): Promise<void> {
+async function waitForPythonHealth(timeoutMs = 15000): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
+    if (pythonStartupFailure) {
+      throw new Error(pythonStartupFailure);
+    }
     try {
       const res = await fetch(`${PYTHON_URL}/api/health`);
       if (res.ok) return;
@@ -95,9 +114,13 @@ async function startServer(): Promise<void> {
     app.use(vite.middlewares);
   } else {
     const distDir = path.join(__dirname, 'dist');
+    const indexHtml = path.join(distDir, 'index.html');
+    if (!fs.existsSync(indexHtml)) {
+      throw new Error(`Production frontend build not found at ${indexHtml}. Run "npm run build" first.`);
+    }
     app.use(express.static(distDir));
     app.get('*', (_req, res) => {
-      res.sendFile(path.join(distDir, 'index.html'));
+      res.sendFile(indexHtml);
     });
   }
 
