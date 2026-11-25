@@ -68,9 +68,27 @@ def create_flask_app():
 
     app = Flask(__name__)
 
+    @app.route("/api", methods=["GET", "POST"])
+    @app.route("/api/", methods=["GET", "POST"])
+    def handle_api_root():
+        status, body = dispatch_endpoint("/api", request.method, None)
+        return jsonify(body), status
+
     @app.route("/api/<path:subpath>", methods=["GET", "POST"])
     def handle_api(subpath: str):
-        payload = request.get_json(silent=True) if request.method == "POST" else None
+        if request.method == "POST":
+            raw_body = request.get_data(cache=True)
+            if raw_body and raw_body.strip():
+                payload = request.get_json(silent=True)
+                if payload is None:
+                    return jsonify({"ok": False, "error": "Invalid JSON request body."}), 400
+                if not isinstance(payload, dict):
+                    payload = {}
+            else:
+                payload = {}
+        else:
+            payload = None
+
         status, body = dispatch_endpoint(f"/api/{subpath}", request.method, payload)
         return jsonify(body), status
 

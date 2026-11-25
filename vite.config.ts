@@ -39,6 +39,13 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      // Allows standalone `vite` dev server to proxy /api/* directly to local Flask without Express
+      proxy: {
+        '/api': {
+          target: `http://127.0.0.1:${process.env.PYTHON_BACKEND_PORT || 5050}`,
+          changeOrigin: true,
+        },
+      },
     },
   };
 });
