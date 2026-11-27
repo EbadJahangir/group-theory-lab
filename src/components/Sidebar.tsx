@@ -152,16 +152,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         ))}
       </nav>
-
-      {/* Subtle Team Members mention at the very bottom */}
-      {(!collapsed || isMobileDrawer) && (
-        <div className="px-4 py-3 border-t border-[#D8D4C9] dark:border-[#2D3730] text-[11px] leading-snug text-[#656B61] dark:text-[#A2ACA0] shrink-0">
-          <div className="font-semibold text-[#373B35] dark:text-[#ECEEE9] mb-1">Team Members</div>
-          <div>Ibad Jahangir</div>
-          <div>M. Fahad</div>
-          <div>Ahmad Hassaan</div>
-        </div>
-      )}
     </div>
   );
 
